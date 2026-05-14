@@ -5,9 +5,51 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Planilla" />
 <meta name="theme-color" content="#0f172a" />
+<meta name="description" content="Planilla semanal de sesiones" />
 <title>Planilla Semanal</title>
+<link rel="manifest" href="manifest.json" />
+<!-- iOS icons -->
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='100' fill='%230f172a'/><text y='340' x='80' font-size='320' font-family='sans-serif'>📋</text></svg>" />
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<script>
+// Registrar Service Worker para PWA
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    const swCode = `
+      const CACHE='planilla-v1';
+      self.addEventListener('install', e=> e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['./', './index.html']))));
+      self.addEventListener('fetch', e=> e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).catch(()=>caches.match('./index.html')))));
+    `;
+    const blob = new Blob([swCode], {type:'application/javascript'});
+    const url = URL.createObjectURL(blob);
+    navigator.serviceWorker.register(url).catch(()=>{});
+  });
+}
+
+// Crear manifest dinámicamente para GitHub Pages
+const manifest = {
+  name: "Planilla Semanal",
+  short_name: "Planilla",
+  description: "Planilla semanal de sesiones",
+  start_url: "./",
+  display: "standalone",
+  background_color: "#f1f5f9",
+  theme_color: "#0f172a",
+  orientation: "portrait",
+  icons: [
+    { src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='100' fill='%230f172a'/><text y='340' x='80' font-size='320' font-family='sans-serif'>📋</text></svg>", sizes: "512x512", type: "image/svg+xml", purpose: "any maskable" }
+  ]
+};
+const manifestBlob = new Blob([JSON.stringify(manifest)], {type:'application/json'});
+const manifestUrl = URL.createObjectURL(manifestBlob);
+document.addEventListener('DOMContentLoaded', ()=>{
+  const link = document.createElement('link');
+  link.rel = 'manifest'; link.href = manifestUrl;
+  document.head.appendChild(link);
+});
+</script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { height: 100%; background: #f1f5f9; font-family: 'DM Sans', sans-serif; color: #0f172a; -webkit-font-smoothing: antialiased; }
