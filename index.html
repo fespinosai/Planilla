@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="theme-color" content="#0f172a" />
+<title>Planilla Semanal</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: #f1f5f9; font-family: 'DM Sans', sans-serif; color: #0f172a; -webkit-font-smoothing: antialiased; }
+  button { font-family: 'DM Sans', sans-serif; cursor: pointer; }
+  input { font-family: 'DM Sans', sans-serif; }
+  a { text-decoration: none; }
+
+  #app { max-width: 480px; margin: 0 auto; min-height: 100vh; }
+
+  /* HEADER */
+  .header { background: #0f172a; color: #fff; padding: 18px 16px 12px; position: sticky; top: 0; z-index: 100; }
+  .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .header-title { font-size: 18px; font-weight: 700; }
+  .header-status { font-size: 11px; color: #64748b; margin-top: 2px; }
+  .semana-nav { display: flex; align-items: center; gap: 8px; }
+  .semana-nav button { background: #1e293b; border: none; color: #fff; border-radius: 8px; padding: 6px 12px; font-size: 16px; }
+  .semana-fecha { font-size: 13px; font-weight: 600; text-align: center; min-width: 60px; }
+  .dias-tabs { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 2px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .dias-tabs::-webkit-scrollbar { display: none; }
+  .tab-btn { flex: 0 0 auto; padding: 6px 12px; border-radius: 10px; border: none; font-size: 12px; font-weight: 600; white-space: nowrap; color: #94a3b8; background: #1e293b; transition: all .15s; }
+  .tab-btn.active { background: #3b82f6; color: #fff; }
+
+  /* CONTENT */
+  .content { padding: 14px 14px 90px; }
+
+  /* QUINCENALES BANNER */
+  .q-banner { background: #fff; border-radius: 14px; padding: 10px 14px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+  .q-banner-title { font-size: 10px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; }
+  .q-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+  .q-tag { font-size: 11px; background: #dbeafe; color: #2563eb; border-radius: 8px; padding: 3px 8px; }
+
+  /* RESUMEN */
+  .resumen { display: flex; gap: 7px; margin-bottom: 14px; }
+  .resumen-card { flex: 1; background: #fff; border-radius: 14px; padding: 10px 6px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+  .resumen-val { font-size: 19px; font-weight: 700; }
+  .resumen-label { font-size: 9px; color: #94a3b8; margin-top: 1px; }
+
+  /* DIA TITLE */
+  .dia-title { font-size: 13px; font-weight: 600; color: #64748b; margin-bottom: 10px; }
+
+  /* SESSION CARD */
+  .session-card { background: #fff; border-radius: 16px; padding: 14px 14px; margin-bottom: 10px; box-shadow: 0 1px 4px rgba(0,0,0,.07); border-left: 4px solid #94a3b8; }
+  .session-card.asistida { border-color: #22c55e; }
+  .session-card.no-asistida { border-color: #ef4444; }
+  .session-card.reagendada { border-color: #f59e0b; }
+  .session-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+  .session-nombre { font-size: 15px; font-weight: 600; }
+  .session-meta { font-size: 12px; color: #64748b; margin-top: 2px; }
+  .session-boleta { font-size: 11px; color: #94a3b8; margin-top: 1px; }
+  .badge-q { margin-left: 6px; font-size: 10px; background: #dbeafe; color: #2563eb; border-radius: 6px; padding: 2px 7px; font-weight: 500; }
+  .wa-btn { background: #25d366; color: #fff; border-radius: 10px; padding: 7px 14px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+
+  /* BOTONES ESTADO/PAGO */
+  .btn-group { display: flex; gap: 5px; margin-bottom: 8px; }
+  .btn-group button { flex: 1; padding: 7px 4px; border-radius: 10px; border: none; font-size: 12px; font-weight: 400; background: #f1f5f9; color: #64748b; transition: all .15s; }
+  .btn-group button.active-asistida { background: #dcfce7; color: #16a34a; font-weight: 700; }
+  .btn-group button.active-no { background: #fee2e2; color: #dc2626; font-weight: 700; }
+  .btn-group button.active-reagendada { background: #fef9c3; color: #d97706; font-weight: 700; }
+  .btn-group button.active-pagado { background: #dcfce7; color: #16a34a; font-weight: 700; }
+  .btn-group button.active-pendiente { background: #fee2e2; color: #dc2626; font-weight: 700; }
+  .obs-input { width: 100%; border: 1px solid #e2e8f0; border-radius: 10px; padding: 7px 12px; font-size: 13px; color: #334155; background: #f8fafc; outline: none; }
+
+  /* TSV */
+  .tsv-box { background: #fff; border-radius: 14px; padding: 12px; font-size: 10px; font-family: monospace; white-space: pre; overflow-x: auto; box-shadow: 0 1px 3px rgba(0,0,0,.06); color: #334155; line-height: 1.7; margin-bottom: 12px; }
+  .btn-primary { width: 100%; background: #0f172a; color: #fff; border: none; border-radius: 14px; padding: 15px; font-size: 15px; font-weight: 600; }
+
+  /* TELÉFONOS */
+  .tel-card { background: #fff; border-radius: 14px; padding: 12px 14px; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,.06); display: flex; align-items: center; gap: 10px; }
+  .tel-nombre { font-size: 13px; font-weight: 600; }
+  .tel-num { font-size: 12px; color: #22c55e; margin-top: 2px; cursor: pointer; }
+  .tel-vacio { font-size: 12px; color: #94a3b8; margin-top: 2px; cursor: pointer; }
+  .tel-edit { display: flex; gap: 6px; margin-top: 6px; }
+  .tel-edit input { flex: 1; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 10px; font-size: 13px; outline: none; }
+  .tel-edit .ok { background: #22c55e; color: #fff; border: none; border-radius: 8px; padding: 6px 12px; font-size: 13px; }
+  .tel-edit .cancel { background: #f1f5f9; color: #64748b; border: none; border-radius: 8px; padding: 6px 10px; font-size: 13px; }
+
+  /* EMPTY */
+  .empty { text-align: center; color: #94a3b8; margin-top: 50px; font-size: 14px; }
+
+  /* SECTION TITLE */
+  .section-title { font-size: 14px; font-weight: 600; color: #334155; margin-bottom: 10px; }
+  .section-sub { font-size: 12px; color: #94a3b8; margin-bottom: 14px; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+// ─── DATOS ────────────────────────────────────────────────────────────────────
+const REFERENCIA = new Date("2026-05-11T12:00:00");
+
+const PARES = {
+  Q_MIE11: { A: "Francisco Perez Muñoz", B: "Nicolas Mardones",         label: "Mié 11:00" },
+  Q_LUN18: { A: "Agustina Garay Meza",   B: "Gustavo caro",             label: "Lun 18:00" },
+  Q_MIE18: { A: "Karen Fahrenkrog",      B: "Emilio Gonzalez Valdivia", label: "Mié 18:00" },
+  Q_JUE11: { A: "Marie Claire Birke",    B: "Lucas Baeza",              label: "Jue 11:00" },
+  Q_JUE17: { A: "Tomas Scharovsky Abud", B: "Flor Scharovsky Abud",    label: "Jue 17:00" },
+  Q_VIE17: { A: "gonzalo varoli",        B: "Dario Bowen Huerta",       label: "Vie 17:00" },
+};
+
+const BOLETAS = {
+  "Jaime Fuentes Ramirez":"11625","Catalina pasini":"s/b","Violeta Bustos":"11978",
+  "Julian Pabon fellay":"11516","Joaquin Cea Liepins":"11974","Agustina Garay Meza":"11634",
+  "Gustavo caro":"12245","Elena Lecaros M":"11835","Rodrigo Caris Andrade":"11656",
+  "Natalia Espina":"12296","Claudio Tejos":"11665","Alejandro Abarca":"11862",
+  "Macarena Zahlhass":"12203","Juan Domingo":"s/b","Valentina diaz":"12271",
+  "Agustin Ponassi":"12196","Raimundo Cea Liepins":"11657","Santiago Marquez Parada":"11633",
+  "Francisco Perez Muñoz":"11635","Nicolas Mardones":"s/b","Benjamin Vergara Perez":"11842",
+  "Magdalena Schneider":"12329","Nicolas Sibona":"12246","Thiago Sanchez Fernandez":"12251",
+  "lucas raggio":"","Karen Fahrenkrog":"11667","Emilio Gonzalez Valdivia":"11640",
+  "Greta Lecaros M":"11661","Jaime Jerez":"12277","Sofia Abarca":"11870",
+  "Marie Claire Birke":"12401","Lucas Baeza":"11923","Sujey Vidal Alarcon":"s/b",
+  "Simon ":"s/b","Martin Millar":"11664","Vicente ortiz":"12406",
+  "Tomas Scharovsky Abud":"11931","Flor Scharovsky Abud":"11931","Nicolas Aedo":"11740",
+  "Juan Ignacio Fischer":"11645","Lucia Sanchez":"12473","Maite":"12408",
+  "Felipe Caceres Bravo":"11570","Maxi Chavarria":"12283","Montserrat Rodriguez Gomez":"11596",
+  "gonzalo varoli":"11672","Dario Bowen Huerta":"12295","Pedro Martinez":"12228",
+};
+
+const MONTOS = {
+  "Catalina pasini":40000,"Simon ":45000,"Nicolas Mardones":45000,
+  "Natalia Espina":50000,"Agustina Garay Meza":50000,"Francisco Perez Muñoz":50000,
+  "Emilio Gonzalez Valdivia":50000,"Maxi Chavarria":50000,
+};
+
+const HORARIO_BASE = [
+  {dia:"lunes",hora:11,p:"Claudio Tejos",q:false},
+  {dia:"lunes",hora:12,p:"Jaime Fuentes Ramirez",q:false},
+  {dia:"lunes",hora:13,p:"Catalina pasini",q:false},
+  {dia:"lunes",hora:15,p:"Violeta Bustos",q:false},
+  {dia:"lunes",hora:16,p:"Julian Pabon fellay",q:false},
+  {dia:"lunes",hora:17,p:"Joaquin Cea Liepins",q:false},
+  {dia:"lunes",hora:18,p:"Q_LUN18",q:true},
+  {dia:"lunes",hora:19,p:"Elena Lecaros M",q:false},
+  {dia:"lunes",hora:20,p:"Rodrigo Caris Andrade",q:false},
+  {dia:"martes",hora:10,p:"Natalia Espina",q:false},
+  {dia:"martes",hora:11,p:"Claudio Tejos",q:false},
+  {dia:"martes",hora:12,p:"Alejandro Abarca",q:false},
+  {dia:"martes",hora:13,p:"Macarena Zahlhass",q:false},
+  {dia:"martes",hora:15,p:"Juan Domingo",q:false},
+  {dia:"martes",hora:16,p:"Valentina diaz",q:false},
+  {dia:"martes",hora:17,p:"Agustin Ponassi",q:false},
+  {dia:"martes",hora:18,p:"Raimundo Cea Liepins",q:false},
+  {dia:"martes",hora:19,p:"Santiago Marquez Parada",q:false},
+  {dia:"miercoles",hora:11,p:"Q_MIE11",q:true},
+  {dia:"miercoles",hora:12,p:"Benjamin Vergara Perez",q:false},
+  {dia:"miercoles",hora:13,p:"Magdalena Schneider",q:false},
+  {dia:"miercoles",hora:15,p:"Nicolas Sibona",q:false},
+  {dia:"miercoles",hora:16,p:"Thiago Sanchez Fernandez",q:false},
+  {dia:"miercoles",hora:17,p:"lucas raggio",q:false},
+  {dia:"miercoles",hora:18,p:"Q_MIE18",q:true},
+  {dia:"miercoles",hora:19,p:"Greta Lecaros M",q:false},
+  {dia:"miercoles",hora:20,p:"Jaime Jerez",q:false},
+  {dia:"jueves",hora:10,p:"Sofia Abarca",q:false},
+  {dia:"jueves",hora:11,p:"Q_JUE11",q:true},
+  {dia:"jueves",hora:12,p:"Sujey Vidal Alarcon",q:false},
+  {dia:"jueves",hora:13,p:"Simon ",q:false},
+  {dia:"jueves",hora:15,p:"Martin Millar",q:false},
+  {dia:"jueves",hora:16,p:"Vicente ortiz",q:false},
+  {dia:"jueves",hora:17,p:"Q_JUE17",q:true},
+  {dia:"jueves",hora:18,p:"Nicolas Aedo",q:false},
+  {dia:"jueves",hora:19,p:"Juan Ignacio Fischer",q:false},
+  {dia:"viernes",hora:11,p:"Lucia Sanchez",q:false},
+  {dia:"viernes",hora:12,p:"Maite",q:false},
+  {dia:"viernes",hora:14,p:"Felipe Caceres Bravo",q:false},
+  {dia:"viernes",hora:15,p:"Maxi Chavarria",q:false},
+  {dia:"viernes",hora:16,p:"Montserrat Rodriguez Gomez",q:false},
+  {dia:"viernes",hora:17,p:"Q_VIE17",q:true},
+  {dia:"viernes",hora:18,p:"Sofia Abarca",q:false},
+  {dia:"viernes",hora:19,p:"Pedro Martinez",q:false},
+];
+
+const DIAS_OFFSET = {lunes:0,martes:1,miercoles:2,jueves:3,viernes:4};
+const DIAS_NOMBRE = {lunes:"Lunes",martes:"Martes",miercoles:"Miércoles",jueves:"Jueves",viernes:"Viernes"};
+const DIAS_ORDEN = ["lunes","martes","miercoles","jueves","viernes"];
+
+// ─── HELPERS ──────────────────────────────────────────────────────────────────
+function getLunes(str){ return new Date(str+"T12:00:00"); }
+function semanaIdx(l){ return Math.round((l-REFERENCIA)/(7*86400000)); }
+function resolverQ(key,idx){ const p=PARES[key]; return idx%2===0?p.A:p.B; }
+function getMonto(p){ for(const k in MONTOS) if(k.toLowerCase()===p.toLowerCase()) return MONTOS[k]; return 55000; }
+function getBoleta(p){ for(const k in BOLETAS) if(k.toLowerCase()===p.toLowerCase()) return BOLETAS[k]; return ""; }
+function formatFecha(d){ return d.toLocaleDateString("es-CL",{day:"2-digit",month:"2-digit",year:"numeric"}); }
+function formatCorta(d){ return d.toLocaleDateString("es-CL",{day:"2-digit",month:"2-digit"}); }
+function getLunesActual(){
+  const h=new Date(); const diff=h.getDay()===0?-6:1-h.getDay();
+  const l=new Date(h); l.setDate(h.getDate()+diff); return l.toISOString().split("T")[0];
+}
+function generarSesiones(fechaStr){
+  const lunes=getLunes(fechaStr); const idx=semanaIdx(lunes);
+  return HORARIO_BASE.map((s,i)=>{
+    const paciente=s.q?resolverQ(s.p,idx):s.p;
+    const fecha=new Date(lunes); fecha.setDate(lunes.getDate()+DIAS_OFFSET[s.dia]);
+    return {id:i,fecha:fecha.toISOString(),dia:s.dia,hora:s.hora,paciente,
+      monto:getMonto(paciente),quincenal:s.q,estado:"Asistida",pago:"Pagado",
+      boleta:getBoleta(paciente),obs:""};
+  });
+}
+
+const STORAGE_KEY="planilla-semanas-v1";
+const TEL_KEY="planilla-telefonos-v1";
+function loadLS(k){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):null; }catch{return null;} }
+function saveLS(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch{} }
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+const state = {
+  semanas: loadLS(STORAGE_KEY)||{},
+  telefonos: loadLS(TEL_KEY)||{},
+  semanaActual: getLunesActual(),
+  diaActivo: DIAS_ORDEN[new Date().getDay()-1]||"lunes",
+  vista: "planilla", // planilla | tsv | telefonos
+  guardando: false,
+  telEditando: null,
+  telValor: "",
+};
+
+function getSesiones(){ return state.semanas[state.semanaActual]||[]; }
+
+function cargarSemanaActual(){
+  if(!state.semanas[state.semanaActual]){
+    const nuevas=generarSesiones(state.semanaActual);
+    state.semanas[state.semanaActual]=nuevas;
+    saveLS(STORAGE_KEY,state.semanas);
+  }
+}
+
+function updateSesion(id,campo,valor){
+  const sesiones=getSesiones().map(s=>s.id===id?{...s,[campo]:valor}:s);
+  state.semanas[state.semanaActual]=sesiones;
+  saveLS(STORAGE_KEY,state.semanas);
+  render();
+}
+
+function cambiarSemana(delta){
+  const d=getLunes(state.semanaActual);
+  d.setDate(d.getDate()+delta*7);
+  state.semanaActual=d.toISOString().split("T")[0];
+  state.diaActivo="lunes";
+  cargarSemanaActual();
+  render();
+}
+
+// ─── RENDER ───────────────────────────────────────────────────────────────────
+function render(){
+  const app=document.getElementById("app");
+  cargarSemanaActual();
+  const sesiones=getSesiones();
+  const sesionesDia=sesiones.filter(s=>s.dia===state.diaActivo);
+  const idx=semanaIdx(getLunes(state.semanaActual));
+  const lunes=getLunes(state.semanaActual);
+  const viernes=new Date(lunes); viernes.setDate(lunes.getDate()+4);
+
+  // RESUMEN
+  const asist=sesiones.filter(s=>s.estado==="Asistida").length;
+  const noAsist=sesiones.filter(s=>s.estado==="No asistida").length;
+  const reagend=sesiones.filter(s=>s.estado==="Reagendada").length;
+  const pagado=sesiones.filter(s=>s.estado==="Asistida"&&s.pago==="Pagado").reduce((a,b)=>a+b.monto,0);
+  const pendiente=sesiones.filter(s=>s.estado==="Asistida"&&s.pago==="Pendiente").reduce((a,b)=>a+b.monto,0);
+
+  // QUINCENALES
+  const qTags=Object.entries(PARES).map(([k,p])=>{
+    const pac=idx%2===0?p.A:p.B;
+    return `<span class="q-tag">${p.label}: <strong>${pac.split(" ")[0]}</strong></span>`;
+  }).join("");
+
+  // DÍAS TABS
+  const diasTabs=DIAS_ORDEN.map(d=>{
+    const ss=sesiones.filter(s=>s.dia===d);
+    const a=ss.filter(s=>s.estado==="Asistida").length;
+    const t=ss.length;
+    const activeClass=state.vista==="planilla"&&state.diaActivo===d?"active":"";
+    return `<button class="tab-btn ${activeClass}" onclick="setDia('${d}')">${DIAS_NOMBRE[d].slice(0,3)}${t>0?` <span style='opacity:.7;font-size:10px'>${a}/${t}</span>`:""}</button>`;
+  }).join("")+
+  `<button class="tab-btn ${state.vista==="tsv"?"active":""}" onclick="setVista('tsv')">Excel</button>`+
+  `<button class="tab-btn ${state.vista==="telefonos"?"active":""}" onclick="setVista('telefonos')">WA</button>`;
+
+  // SESSION CARDS
+  let contentHTML="";
+
+  if(state.vista==="planilla"){
+    const cardClass=s=>s.estado==="Asistida"?"asistida":s.estado==="No asistida"?"no-asistida":"reagendada";
+    const estadoBtn=(s,e)=>{
+      let cls="";
+      if(s.estado===e) cls=e==="Asistida"?"active-asistida":e==="No asistida"?"active-no":"active-reagendada";
+      return `<button class="${cls}" onclick="updateSesion(${s.id},'estado','${e}')">${e}</button>`;
+    };
+    const pagoBtn=(s,p)=>{
+      let cls="";
+      if(s.pago===p) cls=p==="Pagado"?"active-pagado":p==="Pendiente"?"active-pendiente":"";
+      return `<button class="${cls}" onclick="updateSesion(${s.id},'pago','${p}')">${p}</button>`;
+    };
+
+    const diaFecha=sesionesDia.length>0?formatFecha(new Date(sesionesDia[0].fecha)):"";
+
+    contentHTML=`
+      <div class="resumen">
+        <div class="resumen-card"><div class="resumen-val" style="color:#22c55e">${asist}</div><div class="resumen-label">Asistidas</div></div>
+        <div class="resumen-card"><div class="resumen-val" style="color:#ef4444">${noAsist}</div><div class="resumen-label">No asist.</div></div>
+        <div class="resumen-card"><div class="resumen-val" style="color:#f59e0b">${reagend}</div><div class="resumen-label">Reagend.</div></div>
+        <div class="resumen-card"><div class="resumen-val" style="color:#0ea5e9">$${Math.round(pagado/1000)}K</div><div class="resumen-label">Pagado</div></div>
+        <div class="resumen-card"><div class="resumen-val" style="color:#f97316">$${Math.round(pendiente/1000)}K</div><div class="resumen-label">Pend.</div></div>
+      </div>
+      <div class="dia-title">${DIAS_NOMBRE[state.diaActivo]}${diaFecha?" — "+diaFecha:""}</div>
+      ${sesionesDia.length===0?'<div class="empty">Sin sesiones este día</div>':
+        sesionesDia.map(s=>`
+          <div class="session-card ${cardClass(s)}">
+            <div class="session-top">
+              <div>
+                <div class="session-nombre">${s.paciente}${s.quincenal?'<span class="badge-q">Q</span>':''}</div>
+                <div class="session-meta">${s.hora}:00 &nbsp;·&nbsp; $${s.monto.toLocaleString("es-CL")}</div>
+                ${s.boleta?`<div class="session-boleta">Boleta ${s.boleta}</div>`:""}
+              </div>
+              ${(()=>{const tel=state.telefonos[s.paciente]||""; return tel?`<a class="wa-btn" href="https://wa.me/56${tel.replace(/\D/g,"")}?text=${encodeURIComponent("Hola, nos vemos a las "+s.hora+":00!")}" target="_blank">WA</a>`:"";})()}
+            </div>
+            <div class="btn-group">
+              ${estadoBtn(s,"Asistida")}${estadoBtn(s,"No asistida")}${estadoBtn(s,"Reagendada")}
+            </div>
+            <div class="btn-group">
+              ${pagoBtn(s,"Pagado")}${pagoBtn(s,"Pendiente")}${pagoBtn(s,"—")}
+            </div>
+            <input class="obs-input" placeholder="Observaciones..." value="${s.obs.replace(/"/g,'&quot;')}"
+              oninput="updateSesion(${s.id},'obs',this.value)" />
+          </div>
+        `).join("")}
+    `;
+  }
+
+  if(state.vista==="tsv"){
+    const tsv=["Fecha\tDía\tHora\tPaciente\tN° boleta\tMonto\tEstado\tPago\tObservaciones",
+      ...sesiones.map(s=>{
+        const f=new Date(s.fecha);
+        return `${formatFecha(f)}\t${s.dia}\t${s.hora}\t${s.paciente}\t${s.boleta}\t${s.monto}\t${s.estado}\t${s.pago}\t${s.obs}`;
+      })].join("\n");
+    contentHTML=`
+      <div class="section-title">Copiar para Excel</div>
+      <div class="tsv-box" id="tsv-content">${tsv.replace(/&/g,"&amp;").replace(/</g,"&lt;")}</div>
+      <button class="btn-primary" onclick="copiarTSV()">Copiar al portapapeles</button>
+    `;
+  }
+
+  if(state.vista==="telefonos"){
+    const todos=Array.from(new Set(
+      HORARIO_BASE.filter(s=>!s.q).map(s=>s.p)
+      .concat(Object.values(PARES).flatMap(p=>[p.A,p.B]))
+    )).sort();
+    contentHTML=`
+      <div class="section-title">Teléfonos para WhatsApp</div>
+      <div class="section-sub">Número sin código de país ni 9 inicial (ej: 98765432)</div>
+      ${todos.map(pac=>{
+        const tel=state.telefonos[pac]||"";
+        const esEditando=state.telEditando===pac;
+        return `<div class="tel-card">
+          <div style="flex:1">
+            <div class="tel-nombre">${pac}</div>
+            ${esEditando?
+              `<div class="tel-edit">
+                <input id="tel-input" value="${state.telValor}" placeholder="98765432" oninput="state.telValor=this.value" />
+                <button class="ok" onclick="guardarTel('${pac}')">✓</button>
+                <button class="cancel" onclick="state.telEditando=null;render()">✕</button>
+              </div>`:
+              `<div class="${tel?"tel-num":"tel-vacio"}" onclick="editarTel('${pac}','${tel}')">${tel?"+56 "+tel:"Agregar número →"}</div>`
+            }
+          </div>
+          ${tel&&!esEditando?`<a class="wa-btn" href="https://wa.me/56${tel}?text=${encodeURIComponent("Hola, nos vemos pronto!")}" target="_blank">WA</a>`:""}
+        </div>`;
+      }).join("")}
+    `;
+  }
+
+  app.innerHTML=`
+    <div class="header">
+      <div class="header-top">
+        <div>
+          <div class="header-title">Planilla semanal</div>
+          <div class="header-status">Datos guardados ✓</div>
+        </div>
+        <div class="semana-nav">
+          <button onclick="cambiarSemana(-1)">‹</button>
+          <div class="semana-fecha">${formatCorta(lunes)} – ${formatCorta(viernes)}</div>
+          <button onclick="cambiarSemana(1)">›</button>
+        </div>
+      </div>
+      <div class="dias-tabs">${diasTabs}</div>
+    </div>
+    <div class="content">
+      ${state.vista==="planilla"?`
+        <div class="q-banner">
+          <div class="q-banner-title">Quincenales esta semana</div>
+          <div class="q-tags">${qTags}</div>
+        </div>`:""}
+      ${contentHTML}
+    </div>
+  `;
+
+  if(state.telEditando) setTimeout(()=>{ const i=document.getElementById("tel-input"); if(i) i.focus(); },50);
+}
+
+// ─── ACCIONES ─────────────────────────────────────────────────────────────────
+window.setDia=function(d){ state.diaActivo=d; state.vista="planilla"; render(); };
+window.setVista=function(v){ state.vista=v; render(); };
+window.cambiarSemana=cambiarSemana;
+window.updateSesion=updateSesion;
+window.editarTel=function(pac,tel){ state.telEditando=pac; state.telValor=tel; render(); };
+window.guardarTel=function(pac){
+  state.telefonos[pac]=state.telValor;
+  saveLS(TEL_KEY,state.telefonos);
+  state.telEditando=null;
+  render();
+};
+window.copiarTSV=function(){
+  const el=document.getElementById("tsv-content");
+  if(el) navigator.clipboard.writeText(el.innerText).then(()=>alert("¡Copiado!")).catch(()=>alert("Selecciona el texto y cópialo manualmente"));
+};
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+const diaHoy = new Date().getDay();
+if(diaHoy>=1&&diaHoy<=5) state.diaActivo=DIAS_ORDEN[diaHoy-1];
+render();
+</script>
+</body>
+</html>
