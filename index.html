@@ -7,10 +7,10 @@
 <meta name="theme-color" content="#0f172a">
 <title>Planilla Semanal</title>
 <style>
-  /* Mantenemos exactamente tu estilo original */
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { height: 100%; background: #f1f5f9; font-family: 'DM Sans', sans-serif; color: #0f172a; -webkit-font-smoothing: antialiased; }
   button { font-family: 'DM Sans', sans-serif; cursor: pointer; }
+  input { font-family: 'DM Sans', sans-serif; }
   #app { max-width: 480px; margin: 0 auto; min-height: 100vh; }
   .header { background: #0f172a; color: #fff; padding: 18px 16px 12px; position: sticky; top: 0; z-index: 100; }
   .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
@@ -18,30 +18,50 @@
   .header-status { font-size: 11px; color: #64748b; margin-top: 2px; }
   .semana-nav { display: flex; align-items: center; gap: 8px; }
   .semana-nav button { background: #1e293b; border: none; color: #fff; border-radius: 8px; padding: 6px 12px; font-size: 16px; }
-  .dias-tabs { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
-  .tab-btn { flex: 0 0 auto; padding: 6px 12px; border-radius: 10px; border: none; font-size: 12px; font-weight: 600; color: #94a3b8; background: #1e293b; }
+  .semana-fecha { font-size: 13px; font-weight: 600; text-align: center; min-width: 60px; }
+  .dias-tabs { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 2px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .tab-btn { flex: 0 0 auto; padding: 6px 12px; border-radius: 10px; border: none; font-size: 12px; font-weight: 600; white-space: nowrap; color: #94a3b8; background: #1e293b; transition: all .15s; }
   .tab-btn.active { background: #3b82f6; color: #fff; }
   .content { padding: 14px 14px 90px; }
+  .q-banner { background: #fff; border-radius: 14px; padding: 10px 14px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+  .q-banner-title { font-size: 10px; font-weight: 600; color: #94a3b8; text-transform: uppercase; margin-bottom: 6px; }
+  .q-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+  .q-tag { font-size: 11px; background: #dbeafe; color: #2563eb; border-radius: 8px; padding: 3px 8px; }
+  .resumen { display: flex; gap: 7px; margin-bottom: 14px; }
+  .resumen-card { flex: 1; background: #fff; border-radius: 14px; padding: 10px 6px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+  .resumen-val { font-size: 19px; font-weight: 700; }
+  .resumen-label { font-size: 9px; color: #94a3b8; margin-top: 1px; }
+  .dia-title { font-size: 13px; font-weight: 600; color: #64748b; margin-bottom: 10px; }
   .session-card { background: #fff; border-radius: 16px; padding: 14px; margin-bottom: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); border-left: 4px solid #94a3b8; }
   .session-card.asistida { border-color: #22c55e; }
   .session-card.no-asistida { border-color: #ef4444; }
+  .session-card.reagendada { border-color: #f59e0b; }
+  .session-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+  .session-nombre { font-size: 15px; font-weight: 600; }
+  .session-meta { font-size: 12px; color: #64748b; margin-top: 2px; }
+  .session-boleta { font-size: 11px; color: #94a3b8; margin-top: 1px; }
+  .badge-q { margin-left: 6px; font-size: 10px; background: #dbeafe; color: #2563eb; border-radius: 6px; padding: 2px 7px; font-weight: 500; }
+  .wa-btn { background: #25d366; color: #fff; border-radius: 10px; padding: 7px 14px; font-size: 12px; font-weight: 700; white-space: nowrap; text-decoration: none; }
   .btn-group { display: flex; gap: 5px; margin-bottom: 8px; }
-  .btn-group button { flex: 1; padding: 10px 4px; border-radius: 10px; border: none; font-size: 12px; background: #f1f5f9; color: #64748b; }
-  .active-asistida { background: #dcfce7 !important; color: #16a34a !important; font-weight: 700; }
-  .active-pagado { background: #dcfce7 !important; color: #16a34a !important; font-weight: 700; }
-  .wa-btn { background: #25d366; color: #fff; border-radius: 10px; padding: 7px 14px; font-size: 12px; font-weight: 700; text-decoration: none; }
-  .q-tag { font-size: 11px; background: #dbeafe; color: #2563eb; border-radius: 8px; padding: 3px 8px; margin: 2px; display: inline-block; }
-  .tsv-box { background: #fff; padding: 12px; font-size: 10px; font-family: monospace; white-space: pre; overflow-x: auto; }
+  .btn-group button { flex: 1; padding: 7px 4px; border-radius: 10px; border: none; font-size: 12px; background: #f1f5f9; color: #64748b; }
+  .btn-group button.active-asistida { background: #dcfce7; color: #16a34a; font-weight: 700; }
+  .btn-group button.active-no { background: #fee2e2; color: #dc2626; font-weight: 700; }
+  .btn-group button.active-pagado { background: #dcfce7; color: #16a34a; font-weight: 700; }
+  .btn-group button.active-pendiente { background: #fee2e2; color: #dc2626; font-weight: 700; }
+  .obs-input { width: 100%; border: 1px solid #e2e8f0; border-radius: 10px; padding: 7px 12px; font-size: 13px; color: #334155; background: #f8fafc; outline: none; }
+  .tsv-box { background: #fff; border-radius: 14px; padding: 12px; font-size: 10px; font-family: monospace; white-space: pre; overflow-x: auto; color: #334155; line-height: 1.7; margin-bottom: 12px; }
+  .btn-primary { width: 100%; background: #0f172a; color: #fff; border: none; border-radius: 14px; padding: 15px; font-size: 15px; font-weight: 600; }
+  .section-title { font-size: 14px; font-weight: 600; color: #334155; margin-bottom: 10px; }
 </style>
 </head>
 <body>
-<div id="app">
-    </div>
+<div id="app"></div>
 
 <script>
-// --- CONFIGURACIÓN DE GOOGLE SHEETS ---
-const WEB_APP_URL = "TU_URL_AQUÍ"; // PEGA AQUÍ TU URL DE LA FOTO
+// ─── CONFIGURACIÓN DE RESPALDO (PASO B) ──────────────────────────────────────
+https://script.google.com/macros/s/AKfycbw4I-hObg7HumGbWIn0myVU-Wr0CHyCHfhFndw4D_O_mfFsmbL6kMlS_uJ2NRZZr2tOWA/exec
 
+// ─── DATOS Y LÓGICA ORIGINAL ──────────────────────────────────────────────────
 const REFERENCIA = new Date("2026-05-11T12:00:00");
 const PARES = {
   Q_MIE11: { A: "Francisco Perez Muñoz", B: "Nicolas Mardones", label: "Mié 11:00" },
@@ -52,106 +72,59 @@ const PARES = {
   Q_VIE17: { A: "gonzalo varoli", B: "Dario Bowen Huerta", label: "Vie 17:00" },
 };
 
-// ... (Mantenemos tus objetos BOLETAS, MONTOS y HORARIO_BASE originales) ...
-const BOLETAS = {"Lucia Sanchez":"12473","Maite":"12408","Felipe Caceres Bravo":"11570","Maxi Chavarria":"12283","Montserrat Rodriguez Gomez":"11596","gonzalo varoli":"11672","Sofia Abarca":"11870"};
-const MONTOS = {"Maxi Chavarria":50000};
+const MONTOS = { "Catalina pasini":40000,"Simon ":45000,"Nicolas Mardones":45000,"Natalia Espina":50000,"Agustina Garay Meza":50000,"Francisco Perez Muñoz":50000,"Emilio Gonzalez Valdivia":50000,"Maxi Chavarria":50000 };
+
 const HORARIO_BASE = [
-  {dia:"lunes",hora:11,p:"Claudio Tejos",q:false},
-  {dia:"lunes",hora:12,p:"Jaime Fuentes Ramirez",q:false},
-  {dia:"lunes",hora:13,p:"Catalina pasini",q:false},
-  {dia:"lunes",hora:15,p:"Violeta Bustos",q:false},
-  {dia:"lunes",hora:16,p:"Julian Pabon fellay",q:false},
-  {dia:"lunes",hora:17,p:"Joaquin Cea Liepins",q:false},
-  {dia:"lunes",hora:18,p:"Q_LUN18",q:true},
-  {dia:"lunes",hora:19,p:"Elena Lecaros M",q:false},
-  {dia:"lunes",hora:20,p:"Rodrigo Caris Andrade",q:false},
-  {dia:"martes",hora:10,p:"Natalia Espina",q:false},
-  {dia:"martes",hora:11,p:"Claudio Tejos",q:false},
-  {dia:"martes",hora:12,p:"Alejandro Abarca",q:false},
-  {dia:"martes",hora:13,p:"Macarena Zahlhass",q:false},
-  {dia:"martes",hora:15,p:"Juan Domingo",q:false},
-  {dia:"martes",hora:16,p:"Valentina diaz",q:false},
-  {dia:"martes",hora:17,p:"Agustin Ponassi",q:false},
-  {dia:"martes",hora:18,p:"Raimundo Cea Liepins",q:false},
-  {dia:"martes",hora:19,p:"Santiago Marquez Parada",q:false},
-  {dia:"miercoles",hora:11,p:"Q_MIE11",q:true},
-  {dia:"miercoles",hora:12,p:"Benjamin Vergara Perez",q:false},
-  {dia:"miercoles",hora:13,p:"Magdalena schneider",q:false},
-  {dia:"miercoles",hora:15,p:"Nicolas Sibona",q:false},
-  {dia:"miercoles",hora:16,p:"Thiago Sanchez Fernandez",q:false},
-  {dia:"miercoles",hora:17,p:"lucas raggio",q:false},
-  {dia:"miercoles",hora:18,p:"Karen Fahrenkrog",q:false},
-  {dia:"miercoles",hora:19,p:"Greta Lecaros M",q:false},
-  {dia:"miercoles",hora:20,p:"Jaime Jerez",q:false},
-  {dia:"jueves",hora:15,p:"Sofia Abarca",q:false},
-  {dia:"jueves",hora:11,p:"Marie Claire Birke",q:false},
-  {dia:"jueves",hora:12,p:"Sujey Vidal Alarcon",q:false},
-  {dia:"jueves",hora:13,p:"Simon ",q:false},
-  {dia:"jueves",hora:15,p:"Martin Millar",q:false},
-  {dia:"jueves",hora:16,p:"Vicente ortiz",q:false},
-  {dia:"jueves",hora:17,p:"Tomas Scharovsky Abud",q:false},
-  {dia:"jueves",hora:18,p:"Nicolas Aedo",q:false},
-  {dia:"jueves",hora:19,p:"Juan Ignacio Fischer",q:false},
-  {dia:"viernes",hora:11,p:"Lucia Sanchez",q:false},
-  {dia:"viernes",hora:12,p:"Maite",q:false},
-  {dia:"viernes",hora:14,p:"Felipe Caceres Bravo",q:false},
-  {dia:"viernes",hora:15,p:"Maxi Chavarria",q:false},
-  {dia:"viernes",hora:16,p:"Montserrat Rodriguez Gomez",q:false},
-  {dia:"viernes",hora:17,p:"gonzalo varoli",q:false},
-  {dia:"viernes",hora:18,p:"Sofia Abarca",q:false},
+  {dia:"lunes",hora:11,p:"Claudio Tejos",q:false}, {dia:"lunes",hora:12,p:"Jaime Fuentes Ramirez",q:false},
+  {dia:"lunes",hora:13,p:"Catalina pasini",q:false}, {dia:"lunes",hora:15,p:"Violeta Bustos",q:false},
+  {dia:"lunes",hora:16,p:"Julian Pabon fellay",q:false}, {dia:"lunes",hora:17,p:"Joaquin Cea Liepins",q:false},
+  {dia:"lunes",hora:18,p:"Q_LUN18",q:true}, {dia:"lunes",hora:19,p:"Elena Lecaros M",q:false},
+  {dia:"lunes",hora:20,p:"Rodrigo Caris Andrade",q:false}, {dia:"martes",hora:10,p:"Natalia Espina",q:false},
+  {dia:"martes",hora:11,p:"Claudio Tejos",q:false}, {dia:"martes",hora:12,p:"Alejandro Abarca",q:false},
+  {dia:"martes",hora:13,p:"Macarena Zahlhass",q:false}, {dia:"martes",hora:15,p:"Juan Domingo",q:false},
+  {dia:"martes",hora:16,p:"Valentina diaz",q:false}, {dia:"martes",hora:17,p:"Agustin Ponassi",q:false},
+  {dia:"martes",hora:18,p:"Raimundo Cea Liepins",q:false}, {dia:"martes",hora:19,p:"Santiago Marquez Parada",q:false},
+  {dia:"miercoles",hora:11,p:"Q_MIE11",q:true}, {dia:"miercoles",hora:12,p:"Benjamin Vergara Perez",q:false},
+  {dia:"miercoles",hora:13,p:"Magdalena schneider",q:false}, {dia:"miercoles",hora:15,p:"Nicolas Sibona",q:false},
+  {dia:"miercoles",hora:16,p:"Thiago Sanchez Fernandez",q:false}, {dia:"miercoles",hora:17,p:"lucas raggio",q:false},
+  {dia:"miercoles",hora:18,p:"Karen Fahrenkrog",q:false}, {dia:"miercoles",hora:19,p:"Greta Lecaros M",q:false},
+  {dia:"miercoles",hora:20,p:"Jaime Jerez",q:false}, {dia:"jueves",hora:15,p:"Sofia Abarca",q:false},
+  {dia:"jueves",hora:11,p:"Marie Claire Birke",q:false}, {dia:"jueves",hora:12,p:"Sujey Vidal Alarcon",q:false},
+  {dia:"jueves",hora:13,p:"Simon ",q:false}, {dia:"jueves",hora:15,p:"Martin Millar",q:false},
+  {dia:"jueves",hora:16,p:"Vicente ortiz",q:false}, {dia:"jueves",hora:17,p:"Tomas Scharovsky Abud",q:false},
+  {dia:"jueves",hora:18,p:"Nicolas Aedo",q:false}, {dia:"jueves",hora:19,p:"Juan Ignacio Fischer",q:false},
+  {dia:"viernes",hora:11,p:"Lucia Sanchez",q:false}, {dia:"viernes",hora:12,p:"Maite",q:false},
+  {dia:"viernes",hora:14,p:"Felipe Caceres Bravo",q:false}, {dia:"viernes",hora:15,p:"Maxi Chavarria",q:false},
+  {dia:"viernes",hora:16,p:"Montserrat Rodriguez Gomez",q:false}, {dia:"viernes",hora:17,p:"gonzalo varoli",q:false},
+  {dia:"viernes",hora:18,p:"Sofia Abarca",q:false}
 ];
 
 const DIAS_OFFSET = {lunes:0,martes:1,miercoles:2,jueves:3,viernes:4};
 const DIAS_NOMBRE = {lunes:"Lunes",martes:"Martes",miercoles:"Miércoles",jueves:"Jueves",viernes:"Viernes"};
 const DIAS_ORDEN = ["lunes","martes","miercoles","jueves","viernes"];
 
-const STORAGE_KEY="planilla-semanas-v1";
+function getLunes(str){ return new Date(str+"T12:00:00"); }
+function semanaIdx(l){ return Math.round((l-REFERENCIA)/(7*86400000)); }
+function resolverQ(key,idx){ const p=PARES[key]; return idx%2===0?p.A:p.B; }
+function getMonto(p){ return MONTOS[p] || 55000; }
+function formatFecha(d){ return d.toLocaleDateString("es-CL",{day:"2-digit",month:"2-digit",year:"numeric"}); }
 
-// FUNCION NUEVA: ENVIAR A GOOGLE SHEETS
-async function enviarRespaldo(sesiones) {
-    if (WEB_APP_URL === "TU_URL_AQUÍ") return;
-    document.querySelector('.header-status').innerText = "Sincronizando...";
-    try {
-        await fetch(WEB_APP_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            body: JSON.stringify(sesiones)
-        });
-        document.querySelector('.header-status').innerText = "Nube actualizada ✓";
-    } catch (e) {
-        document.querySelector('.header-status').innerText = "Error sincronización ✕";
-    }
+async function sincronizarConGoogle(sesiones) {
+  if (WEB_APP_URL.includes("PEGAR_AQUI")) return;
+  document.querySelector('.header-status').innerText = "Sincronizando...";
+  try {
+    await fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(sesiones) });
+    document.querySelector('.header-status').innerText = "Respaldo en la nube ✓";
+  } catch (e) { document.querySelector('.header-status').innerText = "Error respaldo ✕"; }
 }
 
 const state = {
   semanas: JSON.parse(localStorage.getItem(STORAGE_KEY)) || {},
   semanaActual: new Date().toISOString().split("T")[0],
   diaActivo: "lunes",
-  vista: "planilla"
+  vista: "planilla",
+  telefonos: JSON.parse(localStorage.getItem("planilla-telefonos-v1")) || {}
 };
 
-function updateSesion(id,campo,valor){
-  const sesiones = state.semanas[state.semanaActual].map(s=>s.id===id?{...s,[campo]:valor}:s);
-  state.semanas[state.semanaActual] = sesiones;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state.semanas));
-  enviarRespaldo(sesiones); // Respaldo cada vez que cambias algo
-  render();
-}
-
-function render() {
-    const app = document.getElementById("app");
-    // ... (Aquí va toda tu lógica de render original) ...
-    // Para no hacer el mensaje infinito, he simplificado el render, pero tú usa el tuyo completo.
-    app.innerHTML = `
-        <div class="header">
-            <div class="header-top">
-                <div class="header-title">Planilla semanal</div>
-                <div class="header-status">Datos guardados ✓</div>
-            </div>
-            <div class="dias-tabs">
-                ${DIAS_ORDEN.map(d => `<button class="tab-btn ${state.diaActivo === d ? 'active' : ''}" onclick="state.diaActivo='${d}';render()">${d}</button>`).join('')}
-                <button class="tab-btn" onclick="state.vista='tsv';render()">Excel</button>
-            </div>
-        </div>
-        <div class="content">
-            ${state.vista === 'planilla'
+function cargarSemanaActual(){
+  if(!state.semanas[state.
